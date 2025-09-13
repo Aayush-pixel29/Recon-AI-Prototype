@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Recon AI Demo</title><link rel="stylesheet" href="/assets/style.css"></head><body><div class="container"><h1>Recon AI Demo</h1><p>Upload a "before" and "after" image of a disaster zone to see an AI-generated damage assessment.</p><form id="recon-form"><div class="upload-area"><div class="file-input-container"><label class="file-input-label" for="before_image">Before Disaster Image</label><input type="file" id="before_image" name="before_image" accept="image/" class="file-input" required></div><div class="file-input-container"><label class="file-input-label" for="after_image">After Disaster Image</label><input type="file" id="after_image" name="after_image" accept="image/" class="file-input" required></div></div><button type="submit" id="submit-btn">Assess Damage</button></form><div class="loading-indicator">Processing...</div><div class="result-area" id="result-area"><p>Results will appear here.</p></div></div><script>
+    document.getElementById('recon-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const formData = new FormData(form);
+        const submitBtn = document.getElementById('submit-btn');
+        const loadingIndicator = document.querySelector('.loading-indicator');
+        const resultArea = document.getElementById('result-area');
+
+        submitBtn.disabled = true;
+        loadingIndicator.style.display = 'block';
+        resultArea.innerHTML = '<p>Processing...</p>';
+
+        try {
+            const response = await fetch('/', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                resultArea.innerHTML = data.result.replace(/\\n/g, '<br>');
+            } else {
+                resultArea.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+            }
+        } catch (error) {
+            resultArea.innerHTML = `<p style="color: red;">An unexpected error occurred: ${error.message}</p>`;
+        } finally {
+            submitBtn.disabled = false;
+            loadingIndicator.style.display = 'none';
+        }
+    });
+</script>
+</body></html>
